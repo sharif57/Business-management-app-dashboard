@@ -1,6 +1,8 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useLoginMutation } from "../../redux/features/authSlice";
+import toast from "react-hot-toast";
 
 export default function SignInPage() {
   const navigate = useNavigate()
@@ -9,11 +11,22 @@ export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const [login] =useLoginMutation()
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle sign in logic here
-    navigate('/auth/verify-email')
-    console.log({ email, password, rememberMe });
+    try {
+      const response = await login({email, password})
+      console.log(response)
+      if(response.data?.success == true){
+        toast.success(response?.data?.message || 'Login Success')
+        navigate('/')
+      }
+      localStorage.setItem('accessToken', response?.data?.data?.access_token)
+      console.log(response)
+    } catch (error) {
+      toast.error(error?.data?.message || 'Something went wrong')}
+      // console.log(error)
   };
 
   return (
