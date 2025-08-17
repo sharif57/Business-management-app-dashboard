@@ -3,14 +3,13 @@ import { Link } from "react-router-dom";
 import { useAllUsersQuery } from "../../../redux/features/adminSlice";
 
 const DashboardHome = () => {
-      const { data: usersData, isLoading, isError } = useAllUsersQuery({
+      const { data: usersData } = useAllUsersQuery({
     page: 1,
     limit: 10000,
     total: 6,
     totalPages: 1,
     role: "SUB_ADMIN",
   });
-  console.log(usersData?.meta?.users, 'kjskdljf');
 
   const users = usersData?.meta?.users;
 

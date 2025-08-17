@@ -4,9 +4,17 @@ import { PencilIcon } from "lucide-react";
 import { FaAngleLeft } from "react-icons/fa6";
 import dashProfile from "../../assets/images/dashboard-profile.png";
 import { Link, useNavigate } from "react-router-dom";
+import { useUserProfileQuery } from "../../redux/features/useSlice";
 
 export default function MyProfile() {
   const navigate = useNavigate()
+
+   const {data} = useUserProfileQuery()
+    const user = data?.data
+    console.log(user)
+  
+    const IMAGE = import.meta.env.VITE_IMAGE_API
+
   return (
     <div>
       <Link to={'/settings'} className="flex items-center gap-2 text-xl text-white">
@@ -19,7 +27,7 @@ export default function MyProfile() {
             Personal Information
           </h1>
           <button
-            onClick={(e) => navigate(`edit`)}
+            onClick={() => navigate(`edit`)}
             className="bg-[#DC2626] text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-[#e02424] transition-colors"
           >
             <PencilIcon size={16} />
@@ -33,7 +41,7 @@ export default function MyProfile() {
             <div className="relative">
               <div className="w-32 h-32 rounded-full border-4 border-[#f05252] overflow-hidden">
                 <img
-                  src={dashProfile}
+                  src={ `${IMAGE}${user?.avatar}`|| dashProfile}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
@@ -41,7 +49,7 @@ export default function MyProfile() {
             </div>
             <div className="mt-4 text-center">
               <p className="text-gray-300">Profile</p>
-              <p className="text-lg font-semibold">Admin</p>
+              <p className="text-lg font-semibold">{user?.role}</p>
             </div>
           </div>
 
@@ -54,7 +62,7 @@ export default function MyProfile() {
               <input
                 type="text"
                 id="name"
-                value="Chelofer"
+                value={user?.name}
                 readOnly
                 className="w-full bg-[#1e2a33] border border-[#2d3a44] rounded-md px-4 py-2 text-white"
               />
@@ -67,7 +75,7 @@ export default function MyProfile() {
               <input
                 type="email"
                 id="email"
-                value="alkhahlaksaikgkgaik@hmail.com"
+                value={user?.email}
                 readOnly
                 className="w-full bg-[#1e2a33] border border-[#2d3a44] rounded-md px-4 py-2 text-white"
               />
@@ -80,7 +88,7 @@ export default function MyProfile() {
               <input
                 type="tel"
                 id="phone"
-                value="3000597212"
+                value={user?.phone || null}
                 readOnly
                 className="w-full bg-[#1e2a33] border border-[#2d3a44] rounded-md px-4 py-2 text-white"
               />

@@ -1,12 +1,19 @@
 import { ArrowLeft, Camera } from "lucide-react";
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
+import { useUserProfileQuery } from "../../redux/features/useSlice";
 
 export default function EditMyProfile() {
   const [name, setName] = useState("Chelofer");
   const [phoneNumber, setPhoneNumber] = useState("3000597212");
   const [profileImage, setProfileImage] = useState("/placeholder.svg?height=128&width=128");
   const fileInputRef = useRef();
+
+     const {data} = useUserProfileQuery()
+      const user = data?.data
+      console.log(user)
+    
+      const IMAGE = import.meta.env.VITE_IMAGE_API
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
