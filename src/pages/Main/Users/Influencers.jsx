@@ -263,7 +263,13 @@
 import { useState } from "react";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { Table, Modal } from "antd";
-import { useAllInfluencerQuery, usePendingInfluencerQuery } from "../../../redux/features/influencerSlice";
+import {
+  useAllInfluencerQuery,
+  useInfluencerApproveMutation,
+  useInfluencerDeclineMutation,
+  usePendingInfluencerQuery,
+} from "../../../redux/features/influencerSlice";
+import toast from "react-hot-toast";
 
 export default function Influencers() {
   const [activeTab, setActiveTab] = useState("pending");
@@ -272,6 +278,7 @@ export default function Influencers() {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedInfluencer, setSelectedInfluencer] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   // Fetch all influencers (approved)
   const { data: influencer, isLoading: isAllLoading, isError: isAllError } = useAllInfluencerQuery({
@@ -285,8 +292,13 @@ export default function Influencers() {
     limit: pageSize,
   });
 
-  // Determine which data to display based on active tab
-  const currentData = activeTab === "pending" ? pendingInfluencer : influencer;
+  const [influencerApprove, { isLoading: isApproving }] = useInfluencerApproveMutation();
+  const [influencerDecline, { isLoading: isDeclining }] = useInfluencerDeclineMutation();
+
+
+  // TODO
+  // Pending tab shows approved influencers, Approved tab shows pending influencers
+  const currentData = activeTab === "pending" ? pendingInfluencer :influencer ;
   const tableData = currentData?.data?.map((item) => ({
     id: item.id,
     image: item.avatar,
@@ -303,36 +315,58 @@ export default function Influencers() {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setCurrentPage(1); // Reset to first page when tab changes
+    setErrorMessage(null); // Clear error message on tab change
   };
 
   const handlePageChange = (page) => {
     if (page > 0 && page <= totalPages) {
       setCurrentPage(page);
+      setErrorMessage(null); // Clear error message on page change
     }
   };
 
-  const handleAssign = (record) => {
-    setSelectedInfluencer(record.name);
-    setShowAssignModal(true);
+  const handleAssign = async (record) => {
+    try {
+      const response = await influencerApprove({ id: record.id, data: {} }).unwrap();
+      console.log("Approval response:", response);
+      setSelectedInfluencer(record.name);
+      setShowAssignModal(activeTab === "approved"); 
+      setShowSuccessModal(activeTab === "pending"); 
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error approving influencer:", error);
+      setErrorMessage(error?.data?.message || "Failed to approve influencer. Please try again.");
+    }
   };
 
-  const handleConfirmAssign = () => {
-    // TODO: Add API call to assign the campaign to the influencer
-    // Example: dispatch(assignCampaign({ influencerId: selectedInfluencerId, campaign: "McDonald's New Menu Launch" }));
-    setShowAssignModal(false);
-    setShowSuccessModal(true);
-
-    setTimeout(() => {
-      setShowSuccessModal(false);
-    }, 2000);
+  const handleConfirmAssign = async () => {
+    try {
+      console.log(`Assigned campaign to ${selectedInfluencer}`);
+      setShowAssignModal(false);
+      setShowSuccessModal(true);
+      setTimeout(() => {
+        setShowSuccessModal(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Error assigning campaign:", error);
+      setErrorMessage(error?.data?.message || "Failed to assign campaign. Please try again.");
+    }
   };
 
-  const handleDecline = (id) => {
-    // TODO: Add API call to decline the influencer
-    // Example: dispatch(declineInfluencer(id));
-    console.log(`Declined influencer with ID: ${id}`);
+  const handleDecline = async (id) => {
+    try {
+      const response = await influencerDecline({ id, data: {} }).unwrap();
+      toast.success( response?.data?.message ||"Influencer declined successfully");
+      console.log("Decline response:", response);
+    } catch (error) {
+      console.error("Error declining influencer:", error);
+      setErrorMessage(error?.data?.message || "Failed to decline influencer. Please try again.");
+    }
   };
-    const IMAGE = import.meta.env.VITE_IMAGE_API
+
+  const IMAGE = import.meta.env.VITE_IMAGE_API;
 
   const columns = [
     {
@@ -341,7 +375,7 @@ export default function Influencers() {
       key: "image",
       render: (image) => (
         <img
-          src={`${IMAGE}${image}` || "/company.png"} // Fallback image if avatar is null
+          src={image ? `${IMAGE}${image}` : "/company.png"} // Fallback image if avatar is null
           alt="Influencer"
           className="w-10 h-10 rounded-full"
         />
@@ -373,25 +407,37 @@ export default function Influencers() {
       render: (_, record) => (
         <div className="flex space-x-2">
           {activeTab === "pending" ? (
-            <button
-              className="bg-[#DC2626] hover:bg-red-700 text-white px-4 py-1 rounded text-sm"
-              onClick={() => handleAssign(record)}
-            >
-              Assign Campaign
-            </button>
-          ) : (
             <>
               <button
-                className="bg-gray-200 border border-[#DC2626] hover:bg-gray-300 text-gray-800 px-4 py-1 rounded text-sm"
+                className="bg-gray-200 border border-[#DC2626] hover:bg-gray-300 text-gray-800 px-4 py-1 rounded text-sm disabled:opacity-50"
                 onClick={() => handleDecline(record.id)}
+                disabled={isDeclining}
               >
                 Decline
               </button>
               <button
-                className="bg-[#DC2626] hover:bg-red-700 text-white px-4 py-1 rounded text-sm"
+                className="bg-[#DC2626] hover:bg-red-700 text-white px-4 py-1 rounded text-sm disabled:opacity-50"
                 onClick={() => handleAssign(record)}
+                disabled={isApproving}
               >
                 Approve
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="bg-gray-200 border border-[#DC2626] hover:bg-gray-300 text-gray-800 px-4 py-1 rounded text-sm disabled:opacity-50"
+                onClick={() => handleDecline(record.id)}
+                disabled={isDeclining}
+              >
+                Decline
+              </button>
+              <button
+                className="bg-[#DC2626] hover:bg-red-700 text-white px-4 py-1 rounded text-sm disabled:opacity-50"
+                onClick={() => handleAssign(record)}
+                disabled={isApproving}
+              >
+                Assign Campaign
               </button>
             </>
           )}
@@ -409,13 +455,24 @@ export default function Influencers() {
     return <div className="text-white p-4">Error loading influencers. Please try again.</div>;
   }
 
-
-
   return (
     <div className="text-white p-4">
       <div className="mx-auto">
+        {/* Error Message */}
+        {errorMessage && (
+          <div className="mb-4 p-3 bg-red-600 text-white rounded">{errorMessage}</div>
+        )}
+
         {/* Tabs */}
         <div className="flex mb-6">
+            <button
+            className={`px-6 py-2 rounded-t-md ${
+              activeTab === "pending" ? "bg-[#DC2626] text-white" : "bg-gray-800 text-gray-400"
+            }`}
+            onClick={() => handleTabChange("pending")}
+          >
+            Pending
+          </button>
           <button
             className={`px-6 py-2 rounded-t-md ${
               activeTab === "approved" ? "bg-[#DC2626] text-white" : "bg-gray-800 text-gray-400"
@@ -424,14 +481,7 @@ export default function Influencers() {
           >
             Approved
           </button>
-          <button
-            className={`px-6 py-2 rounded-t-md ${
-              activeTab === "pending" ? "bg-[#DC2626] text-white" : "bg-gray-800 text-gray-400"
-            }`}
-            onClick={() => handleTabChange("pending")}
-          >
-            Pending
-          </button>
+        
         </div>
 
         {/* Ant Design Table */}
@@ -471,7 +521,7 @@ export default function Influencers() {
         {/* Assign Modal */}
         <Modal
           title="Assign Campaign"
-          visible={showAssignModal}
+          open={showAssignModal}
           onCancel={() => setShowAssignModal(false)}
           footer={[
             <button
@@ -507,8 +557,8 @@ export default function Influencers() {
 
         {/* Success Modal */}
         <Modal
-          title="Assignment Successful"
-          visible={showSuccessModal}
+          title={activeTab === "approved" ? "Assignment Successful" : "Approval Successful"}
+          open={showSuccessModal}
           onCancel={() => setShowSuccessModal(false)}
           footer={null}
           centered
@@ -519,16 +569,18 @@ export default function Influencers() {
                 <Check className="text-[#DC2626]" size={40} />
               </div>
             </div>
-            <p className="mb-2">You assigned</p>
+            <p className="mb-2">{activeTab === "approved" ? "You assigned" : "You approved"}</p>
             <div className="flex items-center justify-center mb-2">
               <div className="w-6 h-6 bg-gray-700 rounded-full mr-2"></div>
               <span className="font-medium">{selectedInfluencer}</span>
-              <span className="mx-1">to</span>
+              {activeTab === "approved" && <span className="mx-1">to</span>}
             </div>
-            <div className="flex items-center justify-center">
-              <div className="w-6 h-6 bg-yellow-200 rounded mr-2"></div>
-              <span>McDonald New Menu Launch</span>
-            </div>
+            {activeTab === "approved" && (
+              <div className="flex items-center justify-center">
+                <div className="w-6 h-6 bg-yellow-200 rounded mr-2"></div>
+                <span>McDonalds New Menu Launch</span>
+              </div>
+            )}
           </div>
         </Modal>
       </div>

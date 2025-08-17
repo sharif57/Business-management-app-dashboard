@@ -20,11 +20,32 @@ const influencerApi = baseApi.injectEndpoints({
             providesTags: ["Influencer"],
           }),
 
+          influencerApprove: builder.mutation({
+            query: ({data, id}) => ({
+              url: `/sub-admin/influencers/${id}/approve`,
+              method: "POST",
+              body: data,
+            }),
+            invalidatesTags: ["Influencer"],
+          }),
+
+          influencerDecline: builder.mutation({
+            query: ({data, id}) => ({
+                // http://10.10.12.51:3929/api/v1/sub-admin/influencers/6891d729bb7ca0dd9e073a36/decline
+              url: `/sub-admin/influencers/${id}/decline`,
+              method: "POST",
+              body: data,
+            }),
+            invalidatesTags: ["Influencer"],
+          }),
+
     })
 
 })
 
 export const {
     useAllInfluencerQuery,
-    usePendingInfluencerQuery
+    usePendingInfluencerQuery,
+    useInfluencerApproveMutation,
+    useInfluencerDeclineMutation
 } = influencerApi
