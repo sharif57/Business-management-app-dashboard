@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 
 export default function SignInPage() {
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useState("");
@@ -15,6 +16,7 @@ export default function SignInPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await login({email, password})
       console.log(response)
@@ -25,8 +27,10 @@ export default function SignInPage() {
       localStorage.setItem('accessToken', response?.data?.data?.access_token)
       console.log(response)
     } catch (error) {
-      toast.error(error?.data?.message || 'Something went wrong')}
+      toast.error(error?.error || 'Something went wrong')}
       // console.log(error)
+
+    setLoading(false);
   };
 
   return (
@@ -163,9 +167,10 @@ export default function SignInPage() {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-[#DC2626] hover:bg-red-700 focus:ring-4 focus:ring-red-900 font-medium rounded-md text-sm px-5 py-2.5 text-center transition-colors duration-200"
             >
-              Sign In
+              {loading ? "Signing In..." : "Sign In"}
             </button>
 
            

@@ -1,6 +1,8 @@
 import { Eye, EyeOff, KeyRound } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useResetPasswordMutation } from "../../redux/features/authSlice";
+import toast from "react-hot-toast";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -8,10 +10,24 @@ export default function ResetPassword() {
   const [showPassword1, setShowPassword1] = useState(false);
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const [resetPassword] =useResetPasswordMutation()
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const res = await resetPassword({password})
+      if (res?.data?.success) {
+        toast.success(res?.data?.message || "Password reset successfully");
+        localStorage.setItem("accessToken", res?.data?.data?.access_token);
+        localStorage.removeItem("resetToken");
+        navigate(`/`);
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong");
+      console.log(error);
+    }
     // Handle sign in logic here
-    navigate("/auth");
+    // navigate("/auth");
     console.log({ password });
   };
 
