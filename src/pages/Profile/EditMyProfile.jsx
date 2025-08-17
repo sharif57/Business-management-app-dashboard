@@ -1,19 +1,31 @@
 import { ArrowLeft, Camera } from "lucide-react";
-import { useState, useRef } from "react";
-import { Link } from "react-router-dom";
-import { useUserProfileQuery } from "../../redux/features/useSlice";
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useUpdateProfileMutation, useUserProfileQuery } from "../../redux/features/useSlice";
+import toast from "react-hot-toast";
 
 export default function EditMyProfile() {
-  const [name, setName] = useState("Chelofer");
-  const [phoneNumber, setPhoneNumber] = useState("3000597212");
-  const [profileImage, setProfileImage] = useState("/placeholder.svg?height=128&width=128");
+  const navigate = useNavigate();
+  const { data, isLoading, isError } = useUserProfileQuery();
+  const user = data?.data;
+  const IMAGE = import.meta.env.VITE_IMAGE_API;
+
+  // Initialize state with default empty values
+  const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [profileImage, setProfileImage] = useState("");
   const fileInputRef = useRef();
 
-     const {data} = useUserProfileQuery()
-      const user = data?.data
-      console.log(user)
-    
-      const IMAGE = import.meta.env.VITE_IMAGE_API
+  const [updateProfile] = useUpdateProfileMutation();
+
+  // Update state when user data is available
+  useEffect(() => {
+    if (user) {
+      setName(user.name || "");
+      setPhoneNumber(user.phone || "");
+      setProfileImage(user.avatar || "");
+    }
+  }, [user]);
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -32,11 +44,27 @@ export default function EditMyProfile() {
     }
   };
 
-  const handleSaveChanges = () => {
-    // Here you would typically send the data to your backend
-    console.log("Saving changes:", { name, phoneNumber, profileImage });
-    alert("Changes saved successfully!");
+  const handleSaveChanges = async () => {
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("phone", phoneNumber);
+    if (fileInputRef.current?.files?.[0]) {
+      formData.append("avatar", fileInputRef.current.files[0]);
+    }
+
+    try {
+      const res = await updateProfile(formData).unwrap(); // Use formData instead of individual fields
+      toast.success(res?.message || "Profile updated successfully");
+      navigate(-1);
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.data?.message || "Failed to update profile");
+    }
   };
+
+  // Handle loading and error states
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error loading profile</div>;
 
   return (
     <div className="w-full p-6 bg-[#1a2329] text-white rounded-lg">
@@ -62,7 +90,7 @@ export default function EditMyProfile() {
             <div className="relative cursor-pointer" onClick={handleImageClick}>
               <div className="w-32 h-32 rounded-full border-4 border-[#f05252] overflow-hidden">
                 <img
-                  src={profileImage || "/placeholder.svg"}
+                  src={profileImage ? `${IMAGE}${profileImage}` : "/placeholder.svg"}
                   alt="Profile"
                   className="w-full h-full object-cover"
                 />
