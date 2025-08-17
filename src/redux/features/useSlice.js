@@ -28,16 +28,9 @@ export const userApi = baseApi.injectEndpoints({
       invalidatesTags: ["User"],
     }),
 
-    createAdmin: builder.mutation({
-      query: (data) => ({
-        url: "/admin/users/create-sub-admin",
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: ["User"],
-    }),
+ 
 
   }),
 });
 
-export const {useUserProfileQuery, useUserListQuery, useUpdateProfileMutation, useCreateAdminMutation} = userApi;
+export const {useUserProfileQuery, useUserListQuery, useUpdateProfileMutation} = userApi;

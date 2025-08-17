@@ -8,12 +8,10 @@ import { useUserProfileQuery } from "../../redux/features/useSlice";
 const Header = () => {
   const navigate = useNavigate();
 
-  const {data} = useUserProfileQuery()
-  console.log(data?.data)
+  const {data} = useUserProfileQuery({limit: 1, page: 1})
   const user = data?.data
 
   const IMAGE = import.meta.env.VITE_IMAGE_API
-  console.log(IMAGE)
 
 
   return (

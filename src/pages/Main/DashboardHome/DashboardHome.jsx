@@ -1,7 +1,19 @@
 import DashboardHomeTable from "../../../Components/DashboardHomeTable";
 import { Link } from "react-router-dom";
+import { useAllUsersQuery } from "../../../redux/features/adminSlice";
 
 const DashboardHome = () => {
+      const { data: usersData, isLoading, isError } = useAllUsersQuery({
+    page: 1,
+    limit: 10000,
+    total: 6,
+    totalPages: 1,
+    role: "SUB_ADMIN",
+  });
+  console.log(usersData?.meta?.users, 'kjskdljf');
+
+  const users = usersData?.meta?.users;
+
   return (
     <div className="space-y-[24px]">
       <div className="flex   gap-3 mb-4">
@@ -12,7 +24,7 @@ const DashboardHome = () => {
                 {"Total number of Influencers"}
               </h3>
               <h3 className="text-[30px] font-extralight text-white text-center">
-                {`8920 `}
+                {`${users?.INFLUENCER || 0}`} 
               </h3>
             </div>
           </div>
@@ -22,7 +34,7 @@ const DashboardHome = () => {
               <h3 className="text-[20px] text-[#B8BDBF]">
                 {"Total number of Sub-Adims"}
               </h3>
-              <h3 className="text-[30px] font-extralight text-white">50</h3>
+              <h3 className="text-[30px] font-extralight text-white">{users?.SUB_ADMIN || 0}</h3>
             </div>
           </div>
         </div>

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { BsArrowLeft, BsEye, BsEyeSlash } from "react-icons/bs";
 import { Link, useNavigate } from "react-router-dom";
-import { useCreateAdminMutation } from "../../../redux/features/useSlice";
 import toast from "react-hot-toast";
+import { useCreateAdminMutation } from "../../../redux/features/adminSlice";
 
 const CreateAdminForm = () => {
   const router = useNavigate();
