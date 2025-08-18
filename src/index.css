@@ -17,7 +17,83 @@
   color: white !important; /* White text */
 }
 
+/* AssignCampaignModal.css */
+.custom-modal .ant-modal-content {
+  background-color: #1f1f1f; /* Black background for modal content */
+  color: #ffffff; /* White text for contrast */
+  border-radius: 8px;
+}
 
+.custom-modal .ant-modal-header {
+  background-color: #1f1f1f; /* Black background for header */
+  border-bottom: 1px solid #374151; /* Subtle border for dark theme */
+}
+
+.custom-modal .ant-modal-title {
+  color: #ffffff; /* White title text */
+}
+
+.custom-modal .ant-modal-close-x {
+  color: #ffffff; /* White close icon */
+}
+
+.custom-search-input {
+  background-color: #374151;
+  border: 1px solid #374151; /* Gray border for dark theme */
+  color: black; /* Light text color */
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.custom-search-input .ant-input {
+  background-color: transparent;
+  color: #abc2d3;
+}
+
+.custom-search-input .ant-input::placeholder {
+  color: #64748b; /* Placeholder color for dark theme */
+}
+
+.custom-search-input .search-icon {
+  color: #64748b; /* Search icon color */
+}
+
+.custom-search-input:hover,
+.custom-search-input:focus {
+  border-color: #dc2626; /* Red border on hover/focus */
+  box-shadow: none;
+}
+
+.campaign-container {
+  border: 1px solid #374151; /* Gray border for campaign section */
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.custom-cancel-button {
+  background-color: #374151; /* Gray background for cancel button */
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 24px;
+}
+
+.custom-cancel-button:hover {
+  background-color: #4b5563; /* Lighter gray on hover */
+}
+
+.custom-confirm-button {
+  background-color: #dc2626; /* Red background for assign button */
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 24px;
+  width: 100%; /* Full-width button */
+}
+
+.custom-confirm-button:hover {
+  background-color: #b91c1c; /* Darker red on hover */
+}
 
 /* phone Input  */
 .PhoneInputInput {
