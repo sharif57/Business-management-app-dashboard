@@ -19,6 +19,7 @@ export const baseApi = createApi({
   tagTypes: [
     "User",
     'Influencer',
+    "Campaign",
     'Video',
     "Privacy",
   ], // Added all necessary tags

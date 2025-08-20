@@ -39,6 +39,16 @@ const influencerApi = baseApi.injectEndpoints({
             invalidatesTags: ["Influencer"],
           }),
 
+          assignTask: builder.mutation({
+            query: ({data, id}) => ({
+              // /sub-admin/campaigns/:campaignId/create-task
+              url: `/sub-admin/campaigns/${id}/create-task`,
+              method: "POST",
+              body: data,
+            }),
+            invalidatesTags: ["Influencer"],
+          }),
+
     })
 
 })
@@ -47,5 +57,6 @@ export const {
     useAllInfluencerQuery,
     usePendingInfluencerQuery,
     useInfluencerApproveMutation,
-    useInfluencerDeclineMutation
+    useInfluencerDeclineMutation,
+    useAssignTaskMutation
 } = influencerApi
