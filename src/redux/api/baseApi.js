@@ -22,6 +22,7 @@ export const baseApi = createApi({
     "Campaign",
     'Video',
     "Privacy",
+    "Payment"
   ], // Added all necessary tags
   endpoints: () => ({}),
 });
