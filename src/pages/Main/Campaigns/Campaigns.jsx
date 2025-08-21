@@ -1,13 +1,18 @@
+
+
 import { useState } from "react";
 import { Table } from "antd";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Trash, Edit, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAllCampaignQuery } from "../../../redux/features/campaignSlice";
+import { useAllCampaignQuery, useDeleteCampaignMutation, useUpdateCampaignMutation } from "../../../redux/features/campaignSlice";
 import DashboardModal from "../../../Components/DashboardModal";
+import Swal from "sweetalert2";
+import toast from "react-hot-toast";
 
 const Campaigns = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalData, setModalData] = useState({});
+  const [isEditMode, setIsEditMode] = useState(false); // Track if modal is for editing
   const [activeTab, setActiveTab] = useState("active");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10); // Matches API default limit
@@ -18,6 +23,9 @@ const Campaigns = () => {
     limit: pageSize,
     role: "sub-admin",
   });
+
+  const [updateCampaign] = useUpdateCampaignMutation();
+  const [deleteCampaign] = useDeleteCampaignMutation();
 
   // Map API data to table format
   const tableData = campaigns?.data?.map((campaign) => ({
@@ -60,14 +68,91 @@ const Campaigns = () => {
     }
   };
 
-  // Show modal with campaign details
-  const showModal = (data) => {
-    setModalData(data);
+  // Show modal with campaign details or edit form
+  const showModal = (data, edit = false) => {
+    setModalData({
+      ...data,
+      banner: data.banner || "",
+      title: data.title || "",
+      brand: data.brand || "",
+      budget: data.budget.replace("$", "").replace(/,/g, "") || "", // Remove $ and commas for numeric input
+      payout_deadline: data.payout_deadline || "",
+      duration: data.duration || "",
+      expected_metrics: data.expected_metrics || { views: 0, likes: 0, comments: 0, shares: 0 },
+      description: data.description || "",
+    });
+    setIsEditMode(edit);
     setIsModalOpen(true);
   };
 
-    const IMAGE = import.meta.env.VITE_IMAGE_API;
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DC2626",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
 
+    if (result.isConfirmed) {
+      try {
+      const res =   await deleteCampaign(id).unwrap();
+        toast.success("Campaign deleted successfully!" || res?.message);
+      } catch (error) {
+        toast.error(error?.data?.message || "Failed to delete campaign. Please try again.");
+        console.error("Delete error:", error);
+      }
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    const budgetNum = Number(modalData.budget.replace(/[^0-9.-]+/g, "")); // Remove all non-numeric characters except . and -
+    if (isNaN(budgetNum)) {
+      toast.error("Please enter a valid budget amount.");
+      return;
+    }
+
+    const formData = new FormData();
+    // formData.append("id", modalData.id);
+    formData.append("title", modalData.title);
+    formData.append("brand", modalData.brand);
+    formData.append("budget", budgetNum); // Append as number
+    formData.append("payout_deadline", modalData.payout_deadline);
+    formData.append("duration", modalData.duration);
+    formData.append("expected_metrics", JSON.stringify(modalData.expected_metrics));
+    formData.append("description", modalData.description);
+    if (modalData.newBanner) {
+      formData.append("banner", modalData.newBanner);
+    }
+
+    try {
+      const res = await updateCampaign({id: modalData.id, data: formData}).unwrap();
+      toast.success(res?.message || "Campaign updated successfully!");
+      setIsModalOpen(false);
+      setModalData({});
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to update campaign. Please try again.");
+      console.error("Update error:", error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "newBanner" && files) {
+      setModalData((prev) => ({ ...prev, newBanner: files[0] }));
+    } else if (name === "budget") {
+      // Allow only numeric input and remove non-numeric characters on change
+      const cleanValue = value.replace(/[^0-9.-]+/g, "");
+      setModalData((prev) => ({ ...prev, [name]: cleanValue }));
+    } else {
+      setModalData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const IMAGE = import.meta.env.VITE_IMAGE_API;
 
   const columns = [
     {
@@ -109,14 +194,34 @@ const Campaigns = () => {
       key: "action",
       align: "center",
       render: (_, data) => (
-        <div className="flex items-center justify-center">
-          <button
-            onClick={() => showModal(data)}
-            className="btn bg-[#DC2626] text-white px-10 py-2 text-sm rounded"
-          >
-            View Details
-          </button>
-        </div>
+      <div className="flex items-center justify-center gap-2">
+  {/* View Details */}
+  <button
+    onClick={() => showModal(data)}
+    className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg 
+               bg-red-600 text-white hover:bg-red-700 transition duration-200 shadow-md"
+  >
+    <Eye size={18} />
+  </button>
+
+  {/* Edit */}
+  <button
+    onClick={() => showModal(data, true)}
+    className="p-2 rounded-lg bg-blue-100 text-blue-500 hover:bg-blue-200 
+               transition duration-200 shadow-sm"
+  >
+    <Edit size={18} />
+  </button>
+
+  {/* Delete */}
+  <button
+    onClick={() => handleDelete(data.id)}
+    className="p-2 rounded-lg bg-red-100 text-red-500 hover:bg-red-200 
+               transition duration-200 shadow-sm"
+  >
+    <Trash size={18} />
+  </button>
+</div>
       ),
     },
   ];
@@ -205,54 +310,149 @@ const Campaigns = () => {
         backgroundColor="bg-[#EDEAF3]"
       >
         <div className="p-4">
-          <h2 className="text-lg text-center mb-4">Campaign Details</h2>
-          <div className="space-y-4 text-gray-600">
-            <div className="flex justify-between">
-              <p>Campaign ID:</p>
-              <p>{modalData.id}</p>
+          <h2 className="text-lg text-center mb-4">
+            {isEditMode ? "Edit Campaign" : "Campaign Details"}
+          </h2>
+          {isEditMode ? (
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-600">Banner</label>
+                <input
+                  type="file"
+                  name="newBanner"
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600">Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={modalData.title}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600">Brand</label>
+                <input
+                  type="text"
+                  name="brand"
+                  value={modalData.brand}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600">Budget</label>
+                <input
+                  type="number"
+                  name="budget"
+                  value={modalData.budget}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  step="0.01" // Allow decimals
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600">Payout Deadline</label>
+                <input
+                  type="date"
+                  name="payout_deadline"
+                  value={modalData.payout_deadline}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600">Duration</label>
+                <input
+                  type="date"
+                  name="duration"
+                  value={modalData.duration}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600">Expected Metrics</label>
+                <input
+                  type="text"
+                  name="expected_metrics"
+                  value={JSON.stringify(modalData.expected_metrics)}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  placeholder="e.g., {'views': 100, 'likes': 50, 'comments': 20, 'shares': 10}"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600">Description</label>
+                <textarea
+                  name="description"
+                  value={modalData.description}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="text-center">
+                <button
+                  type="submit"
+                  className="w-fit bg-black text-white px-10 py-2 flex items-center justify-center gap-3 text-lg rounded-2xl"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-4 text-gray-600">
+              <div className="flex justify-between">
+                <p>Campaign ID:</p>
+                <p>{modalData.id}</p>
+              </div>
+              <div className="flex justify-between">
+                <p>Title:</p>
+                <p>{modalData.title}</p>
+              </div>
+              <div className="flex justify-between">
+                <p>Brand:</p>
+                <p>{modalData.brand}</p>
+              </div>
+              <div className="flex justify-between">
+                <p>Task:</p>
+                <p>{modalData.task}</p>
+              </div>
+              <div className="flex justify-between">
+                <p>Budget:</p>
+                <p>{modalData.budget}</p>
+              </div>
+              <div className="flex justify-between">
+                <p>Payout Deadline:</p>
+                <p>{modalData.payout_deadline}</p>
+              </div>
+              <div className="flex justify-between">
+                <p>Duration:</p>
+                <p>{new Date(modalData.duration).toLocaleDateString()}</p>
+              </div>
+              <div className="flex justify-between">
+                <p>Expected Metrics:</p>
+                <p>
+                  {modalData.expected_metrics
+                    ? `Views: ${modalData.expected_metrics.views}, Likes: ${modalData.expected_metrics.likes}, Comments: ${modalData.expected_metrics.comments}, Shares: ${modalData.expected_metrics.shares}`
+                    : "N/A"}
+                </p>
+              </div>
+              <div className="flex justify-between">
+                <p>Description:</p>
+                <p>{modalData.description?.substring(0, 100)}...</p>
+              </div>
+              <div className="mt-6 text-center">
+                <button className="w-fit bg-black text-white px-10 py-2 flex items-center justify-center gap-3 text-lg rounded-2xl">
+                  <span className="font-light">Download Details</span>
+                </button>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <p>Title:</p>
-              <p>{modalData.title}</p>
-            </div>
-            <div className="flex justify-between">
-              <p>Brand:</p>
-              <p>{modalData.brand}</p>
-            </div>
-            <div className="flex justify-between">
-              <p>Task:</p>
-              <p>{modalData.task}</p>
-            </div>
-            <div className="flex justify-between">
-              <p>Budget:</p>
-              <p>{modalData.budget}</p>
-            </div>
-            <div className="flex justify-between">
-              <p>Payout Deadline:</p>
-              <p>{modalData.payout_deadline}</p>
-            </div>
-            <div className="flex justify-between">
-              <p>Duration:</p>
-              <p>{new Date(modalData.duration).toLocaleDateString()}</p>
-            </div>
-            <div className="flex justify-between">
-              <p>Expected Metrics:</p>
-              <p>
-                {modalData.expected_metrics
-                  ? `Views: ${modalData.expected_metrics.views}, Likes: ${modalData.expected_metrics.likes}, Comments: ${modalData.expected_metrics.comments}, Shares: ${modalData.expected_metrics.shares}`
-                  : "N/A"}
-              </p>
-            </div>
-            <div className="flex justify-between">
-              <p>Description:</p>
-              <p>{modalData.description?.substring(0, 100)}...</p>
-            </div>
-          </div>
-          <div className="mt-6 text-center">
-            <button className="w-fit bg-black text-white px-10 py-2 flex items-center justify-center gap-3 text-lg rounded-2xl">
-              <span className="font-light">Download Details</span>
-            </button>
-          </div>
+          )}
         </div>
       </DashboardModal>
     </div>

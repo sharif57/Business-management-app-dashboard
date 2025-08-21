@@ -20,7 +20,24 @@ export const campaignApi = baseApi.injectEndpoints({
       invalidatesTags: ["Campaign"],
     }),
 
+    updateCampaign: builder.mutation({
+      query: ({ data, id }) => ({
+        url: `/sub-admin/campaigns/${id}/edit`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Campaign"],
+    }),
+
+    deleteCampaign: builder.mutation({
+      query: (id) => ({
+        url: `/sub-admin/campaigns/${id}/delete`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Campaign"],
+    }),
+
   }),
 });
 
-export const { useAllCampaignQuery, useCreateCampaignMutation} = campaignApi;
+export const { useAllCampaignQuery, useCreateCampaignMutation, useUpdateCampaignMutation, useDeleteCampaignMutation} = campaignApi;
