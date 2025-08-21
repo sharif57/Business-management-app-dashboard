@@ -154,7 +154,7 @@ const Campaigns = () => {
             Completed
           </button>
         </div>
-        <Link to="/create-campaigns">
+        <Link to="/campaigns/create-campaigns">
           <button className="btn flex items-center gap-2 bg-[#DC2626] text-white px-5 py-2 text-sm rounded">
             <Plus size={16} />
             Create New Campaign

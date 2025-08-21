@@ -11,7 +11,16 @@ export const campaignApi = baseApi.injectEndpoints({
       providesTags: ["Campaign"],
     }),
 
+    createCampaign: builder.mutation({
+      query: (data) => ({
+        url: "/sub-admin/campaigns/create",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Campaign"],
+    }),
+
   }),
 });
 
-export const { useAllCampaignQuery} = campaignApi;
+export const { useAllCampaignQuery, useCreateCampaignMutation} = campaignApi;

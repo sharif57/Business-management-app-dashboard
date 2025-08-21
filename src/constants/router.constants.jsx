@@ -56,7 +56,7 @@ export const dashboardItems = [
     element: <Campaigns />,
   },
   {
-    path: "create-campaigns",
+    path: "campaigns/create-campaigns",
     element: <CreateCampaign />,
   },
   {
