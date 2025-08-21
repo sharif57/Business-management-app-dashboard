@@ -462,11 +462,9 @@ export default function Influencers() {
 
   const handleCampaignAssign = async (campaignId) => {
     try {
-      if (!selectedInfluencer?.id) {
-        throw new Error("No influencer selected");
-      }
+      
       const response = await assignTask({
-        id: selectedInfluencer.id,
+        id: campaignId,
         // influencerId: selectedInfluencer.id,
         data: { influencerId: selectedInfluencer.id },
       }).unwrap();
