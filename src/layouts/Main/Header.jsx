@@ -1,8 +1,9 @@
-import {  useNavigate } from "react-router-dom";
+import {  Link, useNavigate } from "react-router-dom";
 import { Badge } from "antd";
 import profileImage from "../../assets/images/dash-profile.png";
 import { TbBellRinging } from "react-icons/tb";
 import { useUserProfileQuery } from "../../redux/features/useSlice";
+import { useAllNotificationQuery } from "../../redux/features/notificationSlice";
 
 
 const Header = () => {
@@ -10,6 +11,14 @@ const Header = () => {
 
   const {data} = useUserProfileQuery({limit: 1, page: 1})
   const user = data?.data
+
+   const { data: notificationData } = useAllNotificationQuery({
+     page: 1,
+     limit: 10,
+   });
+
+   console.log(notificationData?.meta?.pagination?.total, 'notificationsss')
+  
 
   const IMAGE = import.meta.env.VITE_IMAGE_API
 
@@ -28,7 +37,7 @@ const Header = () => {
           onClick={() => navigate("/notifications")}
           className="relative flex items-center "
         >
-          <Badge style={{ backgroundColor: "#000000", width: '20px', height: '20px', objectFit: 'contain' }} count={1}>
+          <Badge style={{ backgroundColor: "#000000", width: '20px', height: '20px', objectFit: 'contain' }} count={`${notificationData?.meta?.pagination?.total || 0}` }>
             <TbBellRinging
               style={{ cursor: "pointer" }}
               className={` w-6 h-6 rounded-full shadow-sm  font-bold transition-all text-[#E8EAEA]`}
@@ -36,9 +45,9 @@ const Header = () => {
           </Badge>
         </div>
         <div className="flex items-center">
-          <div>
+          <Link to={'/settings/profile'}>
             <img src={ `${IMAGE}${user?.avatar}`|| profileImage} alt="" className="rounded-full h-[42px] w-[42px]" />
-          </div>
+          </Link>
         </div>
       </div>
     </div>

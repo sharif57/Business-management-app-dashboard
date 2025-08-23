@@ -22,9 +22,9 @@ const Payment = () => {
   const tableData = paymentHistory?.data?.map((payment) => ({
     key: payment.id,
     id: payment.id,
-    name: payment.influencerId, // Using influencerId as a placeholder for name
+    name: payment.taskId, // Using influencerId as a placeholder for name
     social: `@${payment.influencerId.split("").slice(0, 5).join("")}`, // Simplified social handle
-    campaign: payment.taskId, // Using taskId as a placeholder for campaign name
+    campaign: payment.method, // Using taskId as a placeholder for campaign name
     amount: `$${payment.amount.toLocaleString()}`,
     status: payment.status,
     invoices: payment.invoices[0], // First invoice image
@@ -67,9 +67,9 @@ const Payment = () => {
       ),
     },
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
+      title: "Transaction ID",
+      dataIndex: "id",
+      key: "id",
     },
     {
       title: "Social Handle",
@@ -77,7 +77,7 @@ const Payment = () => {
       key: "social",
     },
     {
-      title: "Campaign Name",
+      title: "method name",
       dataIndex: "campaign",
       key: "campaign",
     },
@@ -87,7 +87,7 @@ const Payment = () => {
       key: "amount",
     },
     {
-      title: "Action",
+      title: "Action",           
       key: "Review",
       align: "center",
       render: (_, data) => (
