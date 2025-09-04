@@ -146,7 +146,7 @@ export const dashboardItems = [
         element: <EditPrivacyPolicy />,
       },
       {
-        name: "Trust & Safety",
+        name: "About Us",
         icon: BiMessageSquareDetail,
         path: "settings/trust-safety",
         element: <Trust />,
