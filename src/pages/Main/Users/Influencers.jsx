@@ -95,7 +95,7 @@ export default function Influencers() {
         data: { influencerId: selectedInfluencer.id },
       }).unwrap();
       
-      toast.success(response?.data?.message || "Campaign assigned successfully");
+      // toast.success(response?.data?.message || "Campaign assigned successfully");
       setShowAssignModal(false);
       setShowSuccessModal(true);
       setTimeout(() => {
@@ -103,6 +103,7 @@ export default function Influencers() {
       }, 2000);
     } catch (error) {
       console.error("Error assigning campaign:", error);
+      toast.error(error?.data?.message || "Failed to assign campaign. Please try again.");
       setErrorMessage(error?.data?.message || "Failed to assign campaign. Please try again.");
     }
   };
@@ -212,9 +213,9 @@ export default function Influencers() {
   return (
     <div className="text-white p-4">
       <div className="mx-auto">
-        {errorMessage && (
+        {/* {errorMessage && (
           <div className="mb-4 p-3 bg-red-600 text-white rounded">{errorMessage}</div>
-        )}
+        )} */}
 
         <div className="flex mb-6 gap-5">
           <button

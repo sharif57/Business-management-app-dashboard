@@ -11,6 +11,14 @@ const influencerApi = baseApi.injectEndpoints({
             }),
             providesTags: ["Influencer"],
           }),
+          influencerDetails: builder.query({
+            query: (id) => ({
+              url: `/sub-admin/influencers/${id}`,
+              method: "GET",
+            }),
+            providesTags: ["Influencer"],
+          })
+          ,
 
           pendingInfluencer: builder.query({
             query: ({ page, limit, total, totalPages}) => ({
@@ -58,5 +66,6 @@ export const {
     usePendingInfluencerQuery,
     useInfluencerApproveMutation,
     useInfluencerDeclineMutation,
-    useAssignTaskMutation
+    useAssignTaskMutation,
+    useInfluencerDetailsQuery
 } = influencerApi

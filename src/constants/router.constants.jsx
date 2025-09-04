@@ -29,6 +29,7 @@ import Payment from "../pages/Main/Payment/Payment";
 import Notification from "../pages/Main/Support/Notification";
 import { PiSpeakerSimpleHighFill } from "react-icons/pi";
 import Notifications from "../pages/Main/Notifications/Notifications";
+import SendNotification from "../Components/Notification/SendNotification";
 
 export const dashboardItems = [
   {
@@ -73,9 +74,13 @@ export const dashboardItems = [
   },
   {
     name: "Notification",
-    path: "support",
+    path: "notification",
     icon: BellDot ,
     element: <Notification />,
+  },
+  {
+    path: "notification/send-notification",
+    element: <SendNotification />,
   },
   {
     path: "notifications",

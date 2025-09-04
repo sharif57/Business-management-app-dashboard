@@ -11,7 +11,43 @@ export const notificationApi = baseApi.injectEndpoints({
       providesTags: ["Payment"],
     }),
 
+    // s/sub-admin/notifications/scheduled
+    scheduledNotification: builder.query({
+      query: ({ page, limit, total, totalPages}) => ({
+        url: `/sub-admin/notifications/scheduled?page=${page}&limit=${limit}&total=${total}&totalPages=${totalPages}`,
+        method: "GET",
+      }),
+      providesTags: ["Payment"],
+    }),
+
+    sendNotificationList: builder.query({
+      query: ({ page, limit, total, totalPages}) => ({
+        url: `/sub-admin/notifications/sent?page=${page}&limit=${limit}&total=${total}&totalPages=${totalPages}`,
+        method: "GET",
+      }),
+      providesTags: ["Payment"],
+    }),
+    // /sub-admin/compromises
+
+    compromisesNotification: builder.query({
+      query: ({ page, limit, total, totalPages}) => ({
+        url: `/sub-admin/compromises?page=${page}&limit=${limit}&total=${total}&totalPages=${totalPages}`,
+        method: "GET",
+      }),
+      providesTags: ["Payment"],
+    }),
+
+    sendNotification: builder.mutation({
+      query: (data) => ({
+        url: "/sub-admin/notifications/send",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Payment"],
+    }),
+
+
      }),
 });
 
-export const { useAllNotificationQuery } = notificationApi;
+export const { useAllNotificationQuery , useScheduledNotificationQuery , useSendNotificationListQuery, useCompromisesNotificationQuery , useSendNotificationMutation } = notificationApi;
