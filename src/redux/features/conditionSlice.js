@@ -11,9 +11,18 @@ privacyGet: builder.query({
   }),
   providesTags: ["Privacy"],
 }),
+
+updatePrivacy: builder.mutation({
+  query: (data) => ({
+    url: "/admin/context-pages/modify",
+    method: "POST",
+    body: data,
+  }),
+  invalidatesTags: ["Privacy"],
+})
     
 
   }),
 });
 
-export const { usePrivacyGetQuery } = conditionApi;
+export const { usePrivacyGetQuery , useUpdatePrivacyMutation } = conditionApi;
