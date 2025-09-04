@@ -325,7 +325,6 @@ export default function Notification() {
     total: 0,
     totalPages: 1,
   });
-  const [sendNotification] = useSendNotificationMutation();
 
   const tabs = ['Influencers', 'Scheduled', 'Sent', 'Compromise'];
 
@@ -374,7 +373,7 @@ export default function Notification() {
                   <div className="text-white">{item.name}</div>
                   <div className="text-slate-300">{item.socials[0]?.platform || 'N/A'}</div>
                   <div className="text-slate-300">{item.socials[0]?.followers?.toLocaleString() || '0'}</div>
-                  <div className="text-slate-300">N/A</div>
+                  <div className="text-slate-300">{item?.role}</div>
                   <div>
                     <Link to={`/notification/send-notification?id=${item.id}`}>
                       <button
@@ -392,15 +391,15 @@ export default function Notification() {
                   <div className="text-slate-300">{item.type}</div>
                   <div className="text-slate-300 truncate">{item.body}</div>
                   <div className="text-slate-300 flex justify-center items-center gap-2">
-                    {new Date(item.scheduledAt).toLocaleString()}
-                    {showSendButton && (
-                      <button
-                        // onClick={() => handleSendNotification(item)}
-                        className="bg-[#DC2626] hover:bg-[#b91c1c] text-white px-4 py-2 text-xs font-medium transition-colors"
-                      >
-                        Send
-                      </button>
-                    )}
+                    {new Date(item.scheduledAt).toLocaleString("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+})}
+
                   </div>
                 </>
               )}
@@ -409,7 +408,17 @@ export default function Notification() {
                   <div className="text-white">{item.recipientName}</div>
                   <div className="text-slate-300">{item.type}</div>
                   <div className="text-slate-300 truncate">{item.body}</div>
-                  <div className="text-slate-300">{new Date(item.createdAt).toLocaleString()}</div>
+                  <div className="text-slate-300">
+                    {/* {new Date(item.createdAt).toLocaleString()} */}
+                    {new Date(item.createdAt).toLocaleString("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+})}
+                    </div>
                 </>
               )}
               {tab === 'Compromise' && (
@@ -418,7 +427,21 @@ export default function Notification() {
                   <div className="text-slate-300">{item.notificationTitle}</div>
                   <div className="text-slate-300 truncate">{item.notificationTitle}</div>
                   <div className="text-slate-300">{new Date(item.sentDate).toLocaleString()}</div>
-                  <div className="text-slate-300">{new Date(item.compromiseDate).toLocaleString()}</div>
+                  <div className="text-slate-300">
+                    
+                    {/* {new Date(item.compromiseDate).toLocaleString()} */}
+
+                    {new Date(item.compromiseDate).toLocaleString("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+})}
+
+
+                  </div>
                 </>
               )}
             </div>
@@ -461,7 +484,7 @@ export default function Notification() {
       if (influencerLoading) return <div className="text-white text-center py-4">Loading...</div>;
       if (influencerError || !influencerList?.data) return <div className="text-red-500 text-center py-4">Error loading influencers</div>;
       const filteredData = filterData(influencerList.data, ['name', 'socials[0].platform']);
-      return renderTable(filteredData, ['Name', 'Social Handle', 'Followers', 'Campaigns', 'Action'], 'Influencers', false, influencerList.meta.pagination);
+      return renderTable(filteredData, ['Name', 'Social Handle', 'Followers', 'Role', 'Action'], 'Influencers', false, influencerList.meta.pagination);
     }
     if (activeTab === 'Scheduled') {
       if (scheduledLoading) return <div className="text-white text-center py-4">Loading...</div>;
